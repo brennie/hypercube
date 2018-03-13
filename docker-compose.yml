@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  builder:
+    container_name: hypercube-builder
+    build: .
+    volumes:
+     - ./hypercube/src:/home/gradle/src/
+     - ./hypercube/build.gradle:/home/gradle/build.gradle
+     - ./hypercube/settings.gradle:/home/gradle/settings.gradle
+     - ./hypercube/gradle.properties:/home/gradle/gradle.properties
+     - ./build:/home/gradle/build/libs
+     - gradle_cache:/home/grade/.gradle
+    command: ["/bin/sh", "-c", "gradle build -t"]
+
+volumes:
+  gradle_cache: {}
