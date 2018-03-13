@@ -1,3 +1,10 @@
+[![CircleCI Build Status][circleci-build-img]][circleci]
+
+[circleci]: https://circle.com/gh/brennie/hypercube
+[circleci-build-img]: https://img.shields.io/circleci/project/github/brennie/hypercube.svg
+
+---
+
 # Hypercube
 
 A Minecraft HTTP API plugin for servers running [Sponge][sponge].
