@@ -1,0 +1,53 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: gradle:4.6-jdk8-alpine
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-gradle-{{ checksum "build.gradle" }}
+      - run:
+          name: Build
+          command: |
+            cd hypercube
+            gradle build
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-gradle-{{ checksum "build.gradle" }}
+      - persist_to_workspace:
+          root: .
+          paths:
+            - hypercube/build/libs/
+
+  release:
+    docker:
+      - image: circleci/python:3.6-stretch
+
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install AWS CLI
+          command: sudo pip install awscli
+      - run:
+          name: Deploy to S3
+          command: aws s3 cp hypercube/build/libs/hypercube-*.jar s3://artifacts.brennie.ca/magrathea/hypercube/releases
+
+workflows:
+  version: 2
+  default:
+    jobs:
+      - build
+      - release:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^release-/
+
