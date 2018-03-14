@@ -1,6 +1,7 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
+  id 'com.github.johnrengelman.shadow' version '2.0.2'
   id 'java'
 }
 
@@ -20,6 +21,7 @@ description = 'An HTTP API for interacting with a Minecraft server.'
 
 dependencies {
   compileOnly 'org.spongepowered:spongeapi:7.0.0'
+  implementation 'com.sparkjava:spark-core:2.7.2'
 }
 
 task replaceTokens(type: Copy) {
@@ -28,4 +30,19 @@ task replaceTokens(type: Copy) {
   filter(ReplaceTokens, tokens: [VERSION: version])
 }
 
+jar.onlyIf { false }
+shadowJar {
+  dependencies {
+    // The Minecraft loader mangles javax.* import paths, so we need to relocate
+    // this to this package to another namespace.
+    relocate 'javax.servlet', 'vendor.javax.servlet'
+
+    exclude dependency('org.slf4j.*:')
+
+    exclude '/about.html'
+    exclude '/jetty-dir.css'
+  }
+}
+
 compileJava.dependsOn replaceTokens
+build.dependsOn shadowJar
